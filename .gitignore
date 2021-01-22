@@ -1,0 +1,8 @@
+# eclipse
+/build/
+.cproject
+.project
+
+# custom
+hex-input.txt
+hex-to-image*.png
