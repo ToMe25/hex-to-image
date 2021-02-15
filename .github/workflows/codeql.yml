@@ -37,6 +37,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
@@ -46,6 +51,9 @@ jobs:
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+    - name: Install meson and ninja
+      run: pip install meson ninja
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
@@ -59,10 +67,10 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    - name: build
+    - name: Compile project
       run: |
-        meson build
-        ninja -C build
+        meson setup build
+        meson compile -C build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
