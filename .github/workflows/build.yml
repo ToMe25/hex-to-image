@@ -26,9 +26,6 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Push Tag
-      run: git push --tags
-
     - name: Generate Changelog
       id: changelog
       run: |
