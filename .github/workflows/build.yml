@@ -65,13 +65,15 @@ jobs:
     - name: Install meson and ninja
       run: pip install meson ninja
 
-    - name: setup meson build
+    - name: Meson setup
       run: meson setup builddir/
       env:
         CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
@@ -103,12 +105,15 @@ jobs:
     - name: Install meson and ninja
       run: pip install meson ninja
 
-    - run: meson setup builddir/
+    - name: Meson setup
+      run: meson setup builddir/
       env:
         CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
@@ -129,6 +134,9 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v1
 
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v2
+
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
@@ -137,12 +145,15 @@ jobs:
     - name: Install meson and ninja
       run: pip install meson ninja
 
-    - run: meson setup builddir/
+    - name: Meson setup
+      run: meson setup builddir/
       env:
         CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
