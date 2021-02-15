@@ -61,8 +61,8 @@ int main(int argc, char **argv) {
 	string output_file = "hex-to-image.png";
 	uint8_t hex_length = 6;
 
-	uint width = 0;
-	uint height = 0;
+	uint16_t width = 0;
+	uint16_t height = 0;
 
 	bool override_output = false;
 
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 
 	if (hex_input.is_open()) {
 		string line;
-		uint max_len = 0;
+		uint16_t max_len = 0;
 
 		vector<string> lines;
 		while (getline(hex_input, line)) {
@@ -188,16 +188,16 @@ int main(int argc, char **argv) {
 
 		uint8_t *pixel_colors = new uint8_t[width * height * channels];
 
-		for (uint i = 0; i < width * height * channels; i++) {
+		for (uint32_t i = 0; i < width * height * channels; i++) {
 			pixel_colors[i] = 0;
 		}
 
 		string temp;
 		string color;
 		istringstream stream;
-		uint array_pos = 0;
-		uint parsed;
-		for (uint y = 0; y < lines.size(); y++) {
+		uint32_t array_pos = 0;
+		uint32_t parsed;
+		for (uint16_t y = 0; y < lines.size(); y++) {
 			line = lines[y];
 
 			if (ignore_linebreaks && temp.length() > 0) {
@@ -206,8 +206,8 @@ int main(int argc, char **argv) {
 			}
 
 			while (line.length() > 0) {
-				for (uint x = 0; x < width; x++) {
-					if (line.length() < (x + 1) * hex_length) {
+				for (uint16_t x = 0; x < width; x++) {
+					if (line.length() < uint32_t((x + 1) * hex_length)) {
 						temp = line.substr(x * hex_length, line.length() - x * hex_length);
 						line = "";
 						break;
