@@ -1,4 +1,1 @@
-executable('hex-to-image', ['hex-to-image.cpp', 'stb_image_write.h'],
-    dependencies: [
-        cppfs,
-    ])
+executable('hex-to-image', ['hex-to-image.cpp', 'stb_image_write.h'])
