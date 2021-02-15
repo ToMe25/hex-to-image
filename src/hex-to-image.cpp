@@ -37,7 +37,7 @@ void printHelp() {
 	cout << "The Source code can be found at https://www.github.com/ToMe25/hex-to-image/" << endl;
 	cout << "Report issues here: https://www.github.com/ToMe25/hex-to-image/issues/" << endl << endl;
 	cout << "argument   |short  |default            |explanation" << endl;
-	cout << "---------------------------------------------------" << endl;
+	cout << "-----------|-------|-------------------|-----------" << endl;
 	cout << "--help     |       |                   |Prints this help text and then quits." << endl;
 	cout << "--info     |       |                   |Prints some info about this program and then quits." << endl;
 	cout << "--input    |-i     |hex-input.txt      |Sets the file with the hex values to convert to an image." << endl;
@@ -145,6 +145,10 @@ int main(int argc, char **argv) {
 
 	if (output_file.find(".png") != string::npos) {
 		output_file = output_file.substr(0, output_file.find(".png"));
+	}
+
+	if (output_file.find(".PNG") != string::npos) {
+		output_file = output_file.substr(0, output_file.find(".PNG"));
 	}
 
 	input_file = (fs::current_path() / input_file).string();
