@@ -11,7 +11,7 @@ on:
     paths:
       - "**.c"
       - "**.cpp"
-      - "**.h
+      - "**.h"
       - ".github/workflows/test.yml"
 
 jobs:
