@@ -26,13 +26,13 @@ jobs:
     - name: Install meson and ninja
       run: pip install meson ninja
     - name: setup meson build
-      run: meson setup build/
+      run: meson setup builddir/
       env:
         CC: gcc
     - name: Meson compile
-      run: meson compile -C build/ -v
+      run: meson compile -C builddir/ -v
     - name: Meson test
-      run: meson test -C build/ -v
+      run: meson test -C builddir/ -v
     - name: Upload Log
       uses: actions/upload-artifact@v1
       if: failure()
@@ -53,13 +53,13 @@ jobs:
       run: brew install gcc
     - name: Install meson and ninja
       run: pip install meson ninja
-    - run: meson setup build/
+    - run: meson setup builddir/
       env:
         CC: gcc
     - name: Meson compile
-      run: meson compile -C build/ -v
+      run: meson compile -C builddir/ -v
     - name: Meson test
-      run: meson test -C build/ -v
+      run: meson test -C builddir/ -v
     - name: Upload Log
       uses: actions/upload-artifact@v1
       if: failure()
@@ -78,13 +78,13 @@ jobs:
         python-version: '3.x'
     - name: Install meson and ninja
       run: pip install meson ninja
-    - run: meson setup build/
+    - run: meson setup builddir/
       env:
         CC: gcc
     - name: Meson compile
-      run: meson compile -C build/ -v
+      run: meson compile -C builddir/ -v
     - name: Meson test
-      run: meson test -C build/ -v
+      run: meson test -C builddir/ -v
     - name: Upload Log
       uses: actions/upload-artifact@v1
       if: failure()
