@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 		istringstream stream;
 		uint32_t array_pos = 0;
 		uint32_t parsed;
-		for (uint16_t y = 0; y < lines.size(); y++) {
+		for (size_t y = 0; y < lines.size(); y++) {
 			line = lines[y];
 
 			if (ignore_linebreaks && temp.length() > 0) {
