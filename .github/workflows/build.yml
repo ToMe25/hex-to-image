@@ -134,12 +134,6 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v1
 
-    - name: Clean up PATH
-      uses: egor-tensin/cleanup-path@v1
-
-    - name: Set up MinGW
-      uses: egor-tensin/setup-mingw@v2
-
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
