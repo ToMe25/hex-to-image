@@ -1,0 +1,158 @@
+name: meson test
+
+on:
+  push:
+    branches: 
+      - master
+    paths:
+      - "**.c"
+      - "**.h"
+      - ".github/workflows/build.yml"
+
+jobs:
+
+  tag:
+    name: Create release
+    runs-on: ubuntu-20.04
+    outputs:
+      new_version: ${{ steps.inc_tag.outputs.new_tag }}
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+
+    - name: Increment Tag
+      id: inc_tag
+      uses: mathieudutour/github-tag-action@v5.1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Push Tag
+      run: git push --tags
+
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        changelog=$(git log ${{ steps.tag_dry.outputs.previous_tag }}..HEAD --no-merges --format="%h %s%+b")
+        changelog="${changelog//'%'/'%25'}"
+        changelog="${changelog//$'\n'/'%0A'}"
+        changelog="${changelog//$'\r'/'%0D'}"
+        echo $changelog
+        echo "::set-output name=changelog::$changelog"
+
+    - name: Create release
+      id: release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ steps.inc_tag.outputs.new_tag }}
+        release_name: Release ${{ steps.inc_tag.outputs.new_version }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
+
+  linux:
+    name: Make Linux Build
+    runs-on: ubuntu-20.04
+    needs: tag
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
+    - name: Install meson and ninja
+      run: pip install meson ninja
+
+    - name: setup meson build
+      run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson compile
+      run: meson compile -C builddir/ -v
+
+    - name: Release add build
+      id: release_build
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.tag.outputs.new_version }}
+        asset_path: ./builddir/src/hex-to-image
+        asset_name: hex-to-image-linux
+        asset_content_type: application/x-sharedlib
+
+  macos:
+    name: Make MacOS Build
+    runs-on: macos-latest
+    needs: tag
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
+    - name: Install gcc
+      run: brew install gcc
+
+    - name: Install meson and ninja
+      run: pip install meson ninja
+
+    - run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson compile
+      run: meson compile -C builddir/ -v
+
+    - name: Release add build
+      id: release_build
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.tag.outputs.new_version }}
+        asset_path: ./builddir/src/hex-to-image
+        asset_name: hex-to-image-macos
+        asset_content_type: application/x-sharedlib
+
+  windows:
+    name: Make Windows Build
+    runs-on: windows-latest
+    needs: tag
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
+    - name: Install meson and ninja
+      run: pip install meson ninja
+
+    - run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson compile
+      run: meson compile -C builddir/ -v
+
+    - name: Release add build
+      id: release_build
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.tag.outputs.new_version }}
+        asset_path: ./builddir/src/hex-to-image.exe
+        asset_name: hex-to-image-windows
+        asset_content_type: application/vnd.microsoft.portable-executable
