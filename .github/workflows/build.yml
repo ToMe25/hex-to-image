@@ -139,7 +139,7 @@ jobs:
 
     - run: meson setup builddir/
       env:
-        CC: gcc
+        CC: clang
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
