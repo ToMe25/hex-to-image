@@ -144,9 +144,15 @@ jobs:
 
     - name: Meson setup
       run: meson setup builddir/
+      env:
+        CC: clang
+        CXX: clang
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: clang
+        CXX: clang
 
     - name: Release add build
       id: release_build
