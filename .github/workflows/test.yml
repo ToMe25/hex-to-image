@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - "**.c"
+      - "**.cpp"
       - "**.h"
       - ".github/workflows/test.yml"
   pull_request:
     paths:
-      - "**.h"
-      - "**.h"
+      - "**.c"
+      - "**.cpp"
+      - "**.h
       - ".github/workflows/test.yml"
 
 jobs:
