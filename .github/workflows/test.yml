@@ -1,8 +1,14 @@
 name: ci_meson
 
 on:
-  - push
-  - pull_request
+  push:
+    paths:
+      - "**.c"
+      - "**.h"
+  pull_request:
+    paths:
+      - "**.h"
+      - "**.h"
 
 jobs:
 
