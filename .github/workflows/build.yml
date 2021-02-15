@@ -15,7 +15,7 @@ jobs:
     name: Create release
     runs-on: ubuntu-20.04
     outputs:
-      new_version: ${{ steps.inc_tag.outputs.new_tag }}
+      upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
     - name: Checkout repo
       uses: actions/checkout@v1
@@ -78,7 +78,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.tag.outputs.new_version }}
+        upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image
         asset_name: hex-to-image-linux
         asset_content_type: application/x-sharedlib
@@ -115,7 +115,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.tag.outputs.new_version }}
+        upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image
         asset_name: hex-to-image-macos
         asset_content_type: application/x-sharedlib
@@ -149,7 +149,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.tag.outputs.new_version }}
+        upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image.exe
         asset_name: hex-to-image-windows
         asset_content_type: application/vnd.microsoft.portable-executable
