@@ -107,7 +107,7 @@ jobs:
       run: pip install meson ninja
 
     - name: Meson setup
-      run: meson setup builddir/
+      run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
 

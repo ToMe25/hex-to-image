@@ -57,7 +57,7 @@ jobs:
       run: brew install gcc
     - name: Install meson and ninja
       run: pip install meson ninja
-    - run: meson setup builddir/
+    - run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
     - name: Meson compile
