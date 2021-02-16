@@ -68,9 +68,13 @@ jobs:
 
     - name: Meson setup
       run: meson setup builddir/
+      env:
+        CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
@@ -104,9 +108,13 @@ jobs:
 
     - name: Meson setup
       run: meson setup builddir/
+      env:
+        CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
@@ -137,9 +145,13 @@ jobs:
 
     - name: Meson setup
       run: meson setup builddir/
+      env:
+        CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
 
     - name: Release add build
       id: release_build
