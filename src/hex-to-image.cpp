@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <filesystem>
 #include <vector>
 #include <sstream>
 #include <cmath>
@@ -16,7 +15,6 @@
 #include "stb_image_write.h"
 
 using namespace std;
-namespace fs = std::filesystem;
 
 enum class Commands {
 	Null,
@@ -151,7 +149,6 @@ int main(int argc, char **argv) {
 		output_file = output_file.substr(0, output_file.find(".PNG"));
 	}
 
-	input_file = (fs::current_path() / input_file).string();
 	ifstream hex_input(input_file);
 
 	if (hex_input.is_open()) {
