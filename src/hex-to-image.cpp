@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
 						cerr
 								<< "Couldn't write image to file, all possible file names already exist."
 								<< endl;
-						delete pixel_colors;
+						delete[] pixel_colors;
 						return 1;
 					}
 				}
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 
 		stbi_write_png(output_file.c_str(), width, height, channels, pixel_colors, width * channels);
 		cout << "Image saved as \"" << output_file << "\"." << endl;
-		delete pixel_colors;
+		delete[] pixel_colors;
 
 		return 0;
 	} else {
