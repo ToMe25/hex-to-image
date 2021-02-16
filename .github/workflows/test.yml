@@ -7,12 +7,14 @@ on:
       - "**.cpp"
       - "**.h"
       - ".github/workflows/test.yml"
+      - "**meson.build"
   pull_request:
     paths:
       - "**.c"
       - "**.cpp"
       - "**.h"
       - ".github/workflows/test.yml"
+      - "**meson.build"
 
 jobs:
 
