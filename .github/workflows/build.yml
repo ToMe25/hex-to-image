@@ -148,5 +148,5 @@ jobs:
       with:
         upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image.exe
-        asset_name: hex-to-image-windows
+        asset_name: hex-to-image-windows.exe
         asset_content_type: application/vnd.microsoft.portable-executable
