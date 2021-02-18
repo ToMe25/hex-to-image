@@ -24,14 +24,14 @@ jobs:
 
     - name: Increment Tag
       id: inc_tag
-      uses: mathieudutour/github-tag-action@v5.1
+      uses: mathieudutour/github-tag-action@v5.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Generate Changelog
       id: changelog
       run: |
-        changelog=$(git log v${{ steps.inc_tag.outputs.previous_tag }}..HEAD --no-merges --format="%h %s%+b")
+        changelog=$(git log ${{ steps.inc_tag.outputs.previous_tag }}..HEAD --no-merges --format="%h %s%+b")
         changelog="${changelog//'%'/'%25'}"
         changelog="${changelog//$'\n'/'%0A'}"
         changelog="${changelog//$'\r'/'%0D'}"
