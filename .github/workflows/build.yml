@@ -20,7 +20,7 @@ jobs:
       upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Increment Tag
       id: inc_tag
@@ -56,10 +56,10 @@ jobs:
     needs: tag
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
@@ -93,12 +93,10 @@ jobs:
     needs: tag
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
+    - name: Install pip
+      run: sudo apt-get install python3-pip
 
     - name: Install meson and ninja
       run: pip install meson ninja
@@ -130,10 +128,10 @@ jobs:
     needs: tag
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
@@ -170,10 +168,10 @@ jobs:
     needs: tag
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
