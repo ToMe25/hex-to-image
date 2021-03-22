@@ -99,6 +99,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip cmake
+        export PATH=$PATH:/home/runner/.local/bin
 
     - name: Install meson and ninja
       run: |
