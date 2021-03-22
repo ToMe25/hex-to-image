@@ -99,7 +99,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip cmake
-        export PATH=$PATH:/home/runner/.local/bin
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Install meson and ninja
       run: |
