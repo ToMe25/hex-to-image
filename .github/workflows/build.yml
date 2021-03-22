@@ -98,10 +98,12 @@ jobs:
     - name: Install pip
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-pip
+        sudo apt-get install -y python3-pip cmake
 
     - name: Install meson and ninja
-      run: pip3 install meson ninja
+      run: |
+        pip3 install scikit-build
+        pip3 install meson ninja
 
     - name: Meson setup
       run: meson setup builddir/
