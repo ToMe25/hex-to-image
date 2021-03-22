@@ -51,7 +51,7 @@ jobs:
         prerelease: false
 
   linux:
-    name: Make Linux Build
+    name: Build on Linux
     runs-on: ubuntu-20.04
     needs: tag
     steps:
@@ -87,8 +87,45 @@ jobs:
         asset_name: hex-to-image-linux
         asset_content_type: application/x-sharedlib
 
+  linux_arm64:
+    name: Build on Linux(ARM64)
+    runs-on: [self-hosted, linux, ARM64]
+    needs: tag
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v1
+
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+
+    - name: Install meson and ninja
+      run: pip install meson ninja
+
+    - name: Meson setup
+      run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson compile
+      run: meson compile -C builddir/ -v
+      env:
+        CC: gcc
+
+    - name: Release add build
+      id: release_build
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.tag.outputs.upload_url }}
+        asset_path: ./builddir/src/hex-to-image
+        asset_name: hex-to-image-linux-arm64
+        asset_content_type: application/x-sharedlib
+
   macos:
-    name: Make MacOS Build
+    name: Build on MacOS
     runs-on: macos-latest
     needs: tag
     steps:
@@ -128,7 +165,7 @@ jobs:
         asset_content_type: application/x-sharedlib
 
   windows:
-    name: Make Windows Build
+    name: Build on Windows
     runs-on: windows-latest
     needs: tag
     steps:
