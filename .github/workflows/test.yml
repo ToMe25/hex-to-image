@@ -2,12 +2,6 @@ name: meson test
 
 on:
   push:
-    paths:
-      - "**.c"
-      - "**.cpp"
-      - "**.h"
-      - ".github/workflows/test.yml"
-      - "**meson.build"
   pull_request:
     paths:
       - "**.c"
@@ -15,83 +9,65 @@ on:
       - "**.h"
       - ".github/workflows/test.yml"
       - "**meson.build"
+      - "meson_options.txt"
 
 jobs:
+  build:
+    strategy:
+      matrix:
+        fail-fast: false
+        include:
+          - os: ubuntu-20.04
+            name: linux
+          - os: windows-latest
+            name: windows
+          - os: macos-latest
+            name: macos
 
-  linux:
-    runs-on: ubuntu-20.04
+    name: Build and test on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+
+    - name: Install gcc
+      id: gcc_install
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install gcc
+
     - name: Install meson and ninja
       run: pip install meson ninja
-    - name: setup meson build
+
+    - name: Meson setup(${{ matrix.name }})
+      id: meson_setup
+      if: ${{ matrix.os != 'macos-latest' }}
       run: meson setup builddir/
       env:
         CC: gcc
-    - name: Meson compile
-      run: meson compile -C builddir/ -v
-    - name: Meson test
-      run: meson test -C builddir/ -v
-    - name: Upload Log
-      uses: actions/upload-artifact@v1
-      if: failure()
-      with:
-        name: Linux_Meson_Testlog
-        path: build/meson-logs/testlog.txt
 
-  macos:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v1
-    - name: Setup Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-    - name: Install gcc
-      run: brew install gcc
-    - name: Install meson and ninja
-      run: pip install meson ninja
-    - run: meson setup builddir/ -Ddynamic=true
+    - name: Meson setup(${{ matrix.name }})
+      id: meson_macos_setup
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
-    - name: Meson compile
-      run: meson compile -C builddir/ -v
-    - name: Meson test
-      run: meson test -C builddir/ -v
-    - name: Upload Log
-      uses: actions/upload-artifact@v1
-      if: failure()
-      with:
-        name: MacOS_Meson_Testlog
-        path: build/meson-logs/testlog.txt
 
-  windows:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v1
-    - name: Setup Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-    - name: Install meson and ninja
-      run: pip install meson ninja
-    - run: meson setup builddir/
-      env:
-        CC: gcc
     - name: Meson compile
       run: meson compile -C builddir/ -v
+
     - name: Meson test
       run: meson test -C builddir/ -v
+
     - name: Upload Log
       uses: actions/upload-artifact@v1
       if: failure()
       with:
-        name: Windows_Meson_Testlog
+        name: ${{ matrix.name }}_meson_testlog
         path: build/meson-logs/testlog.txt

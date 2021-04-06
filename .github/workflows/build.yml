@@ -10,6 +10,7 @@ on:
       - "**.h"
       - ".github/workflows/build.yml"
       - "**meson.build"
+      - "meson_options.txt"
 
 jobs:
 
@@ -18,9 +19,12 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
+
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Increment Tag
       id: inc_tag
@@ -50,24 +54,52 @@ jobs:
         draft: false
         prerelease: false
 
-  linux:
-    name: Build on Linux
-    runs-on: ubuntu-20.04
+  build:
+    strategy:
+      matrix:
+        fail-fast: false
+        include:
+          - os: ubuntu-20.04
+            name: linux
+          - os: windows-latest
+            name: windows
+          - os: macos-latest
+            name: macos
+
+    name: Build on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     needs: tag
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
+    - name: Install gcc
+      id: gcc_install
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install gcc
+
     - name: Install meson and ninja
       run: pip install meson ninja
 
-    - name: Meson setup
+    - name: Meson setup(${{ matrix.name }})
+      id: meson_setup
+      if: ${{ matrix.os != 'macos-latest' }}
       run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson setup(${{ matrix.name }})
+      id: meson_macos_setup
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
 
@@ -76,24 +108,40 @@ jobs:
       env:
         CC: gcc
 
-    - name: Release add build
+    - name: Release add build(${{ matrix.name }}
       id: release_build
+      if: ${{ matrix.os != 'windows-latest' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image
-        asset_name: hex-to-image-linux
+        asset_name: hex-to-image-${{ matrix.name }}
         asset_content_type: application/x-sharedlib
 
-  linux_arm64:
-    name: Build on Linux(ARM64)
+    - name: Release add build(${{ matrix.name }}
+      id: release_windows_build
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.tag.outputs.upload_url }}
+        asset_path: ./builddir/src/hex-to-image.exe
+        asset_name: hex-to-image-windows.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
+
+  build_linux_arm64:
+    name: Build on linux-arm64
     runs-on: [self-hosted, linux, ARM64]
     needs: tag
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Install pip
       run: |
@@ -106,7 +154,8 @@ jobs:
         pip3 install scikit-build
         pip3 install meson ninja
 
-    - name: Meson setup
+    - name: Meson setup(linux-arm64)
+      id: meson_setup
       run: meson setup builddir/
       env:
         CC: gcc
@@ -116,7 +165,7 @@ jobs:
       env:
         CC: gcc
 
-    - name: Release add build
+    - name: Release add build(linux-arm64)
       id: release_build
       uses: actions/upload-release-asset@v1
       env:
@@ -126,80 +175,3 @@ jobs:
         asset_path: ./builddir/src/hex-to-image
         asset_name: hex-to-image-linux-arm64
         asset_content_type: application/x-sharedlib
-
-  macos:
-    name: Build on MacOS
-    runs-on: macos-latest
-    needs: tag
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
-
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install gcc
-      run: brew install gcc
-
-    - name: Install meson and ninja
-      run: pip install meson ninja
-
-    - name: Meson setup
-      run: meson setup builddir/ -Ddynamic=true
-      env:
-        CC: gcc
-
-    - name: Meson compile
-      run: meson compile -C builddir/ -v
-      env:
-        CC: gcc
-
-    - name: Release add build
-      id: release_build
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.tag.outputs.upload_url }}
-        asset_path: ./builddir/src/hex-to-image
-        asset_name: hex-to-image-macos
-        asset_content_type: application/x-sharedlib
-
-  windows:
-    name: Build on Windows
-    runs-on: windows-latest
-    needs: tag
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
-
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install meson and ninja
-      run: pip install meson ninja
-
-    - name: Meson setup
-      run: meson setup builddir/
-      env:
-        CC: gcc
-
-    - name: Meson compile
-      run: meson compile -C builddir/ -v
-      env:
-        CC: gcc
-
-    - name: Release add build
-      id: release_build
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.tag.outputs.upload_url }}
-        asset_path: ./builddir/src/hex-to-image.exe
-        asset_name: hex-to-image-windows.exe
-        asset_content_type: application/vnd.microsoft.portable-executable
