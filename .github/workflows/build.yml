@@ -148,11 +148,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3-pip cmake
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        sudo ln -s /usr/bin/pip3 /usr/bin/pip
 
     - name: Install meson and ninja
       run: |
-        pip3 install scikit-build
-        pip3 install meson ninja
+        pip install scikit-build
+        pip install meson ninja
 
     - name: Meson setup(linux-arm64)
       id: meson_setup
