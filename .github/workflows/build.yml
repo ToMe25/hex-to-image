@@ -46,7 +46,7 @@ jobs:
       id: release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions
       with:
         tag_name: ${{ steps.inc_tag.outputs.new_tag }}
         release_name: Release ${{ steps.inc_tag.outputs.new_version }}
@@ -143,12 +143,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install pip
+    - name: Install cmake
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-pip cmake
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        sudo ln -s /usr/bin/pip3 /usr/bin/pip
+        sudo apt-get install -y cmake
 
     - name: Install meson and ninja
       run: |
