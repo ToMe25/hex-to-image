@@ -41,12 +41,12 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install gcc
+    - name: Install gcc(macos)
       id: gcc_install
       if: ${{ matrix.name == 'macos' }}
       run: brew install gcc
   
-    - name: Install cmake
+    - name: Install cmake(linux-arm64)
       id: cmake_install
       if: ${{ matrix.name == 'linux-arm64' }}
       run: |
@@ -64,9 +64,9 @@ jobs:
       env:
         CC: gcc
 
-    - name: Meson setup(${{ matrix.name }})
+    - name: Meson setup(macos)
       id: meson_macos_setup
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ matrix.name == 'macos' }}
       run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
