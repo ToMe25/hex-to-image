@@ -17,15 +17,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             name: linux
           - os: windows-latest
             name: windows
           - os: macos-latest
             name: macos
+          - os: self-hosted, linux, ARM64
+            name: linux-arm64
 
     name: Build and test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
@@ -39,15 +42,23 @@ jobs:
 
     - name: Install gcc
       id: gcc_install
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ matrix.name == 'macos' }}
       run: brew install gcc
+  
+    - name: Install cmake
+      id: cmake_install
+      if: ${{ matrix.name == 'linux-arm64' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake
 
     - name: Install meson and ninja
-      run: pip install meson ninja
+      id: meson_install
+      run: pip install scikit-build ninja meson
 
     - name: Meson setup(${{ matrix.name }})
       id: meson_setup
-      if: ${{ matrix.os != 'macos-latest' }}
+      if: ${{ matrix.name != 'macos' }}
       run: meson setup builddir/
       env:
         CC: gcc
