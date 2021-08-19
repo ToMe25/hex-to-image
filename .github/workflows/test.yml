@@ -1,3 +1,6 @@
+# Tests whether the source code can be built with meson compile.
+# This would also be the workflow that runs unit tests, if I had written any.
+# All tests are run on windows, ubuntu, macos, and linux-arm64.
 name: meson test
 
 on:
