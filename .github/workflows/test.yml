@@ -23,7 +23,7 @@ jobs:
             name: windows
           - os: macos-latest
             name: macos
-          - os: self-hosted
+          - os: ARM64 # self-hosted linux ARM64 runners
             name: linux-arm64
 
     name: Build and test on ${{ matrix.name }}
