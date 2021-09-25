@@ -1,3 +1,5 @@
+# Builds this project on various systems and releases the builds.
+# Creates builds for the windows, linux, and macos on x86, as well as a linux arm64 build.
 name: meson build
 
 on:
