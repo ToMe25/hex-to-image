@@ -129,7 +129,7 @@ jobs:
     - name: Meson compile
       run: meson compile -C builddir/ -v
 
-    - name: Release add build(${{ matrix.name }}
+    - name: Release add build(${{ matrix.os-name }}
       id: release_build
       if: ${{ matrix.os != 'windows-latest' }}
       uses: actions/upload-release-asset@v1
@@ -138,10 +138,10 @@ jobs:
       with:
         upload_url: ${{ needs.tag.outputs.upload_url }}
         asset_path: ./builddir/src/hex-to-image
-        asset_name: hex-to-image-${{ matrix.name }}
+        asset_name: hex-to-image-${{ matrix.os-name }}
         asset_content_type: application/x-sharedlib
 
-    - name: Release add build(${{ matrix.name }}
+    - name: Release add build(${{ matrix.os-name }}
       id: release_windows_build
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-release-asset@v1
