@@ -5,6 +5,13 @@ name: meson test
 
 on:
   push:
+    paths:
+      - "**.c"
+      - "**.cpp"
+      - "**.h"
+      - ".github/workflows/test.yml"
+      - "**meson.build"
+      - "meson_options.txt"
   pull_request:
     paths:
       - "**.c"
