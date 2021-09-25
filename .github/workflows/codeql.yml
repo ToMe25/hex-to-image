@@ -13,17 +13,14 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]
-  schedule:
-    - cron: '21 12 * * 5'
 
 jobs:
   analyze:
     name: Analyze
-    runs-on: Ubuntu-20.04
+    runs-on: Ubuntu-latest
 
     strategy:
       fail-fast: false
