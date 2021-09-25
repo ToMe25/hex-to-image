@@ -76,6 +76,7 @@ jobs:
 
     name: Build and release on ${{ matrix.os-name }}
     runs-on: ${{ matrix.os }}
+    needs: tag
 
     steps:
     - name: Checkout repo
@@ -129,7 +130,7 @@ jobs:
     - name: Meson compile
       run: meson compile -C builddir/ -v
 
-    - name: Release add build(${{ matrix.os-name }}
+    - name: Release add build(${{ matrix.os-name }})
       id: release_build
       if: ${{ matrix.os != 'windows-latest' }}
       uses: actions/upload-release-asset@v1
@@ -141,7 +142,7 @@ jobs:
         asset_name: hex-to-image-${{ matrix.os-name }}
         asset_content_type: application/x-sharedlib
 
-    - name: Release add build(${{ matrix.os-name }}
+    - name: Release add build(${{ matrix.os-name }})
       id: release_windows_build
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-release-asset@v1
