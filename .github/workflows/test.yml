@@ -22,12 +22,16 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
+            pip-path: ~/.cache/pip
           - os: windows-latest
             name: windows
+            pip-path: ~\AppData\Local\pip\Cache
           - os: macos-latest
             name: macos
+            pip-path: ~/Library/Caches/pip
           - os: ARM64 # self-hosted linux ARM64 runners
             name: linux-arm64
+            pip-path: ~/.cache/pip
 
     name: Build and test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -43,6 +47,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+
+    - name: Cache pip packages
+      id: pip_cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ matrix.pip-path }}
+        key: ${{ matrix.name }}-pip
 
     - name: Install gcc(macos)
       id: gcc_install
