@@ -59,16 +59,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
-            name: linux
+          - os: ubuntu-latest
+            os-name: linux
+            pip-path: ~/.cache/pip
           - os: windows-latest
-            name: windows
+            os-name: windows
+            pip-path: ~\AppData\Local\pip\Cache
           - os: macos-latest
-            name: macos
+            os-name: macos
+            pip-path: ~/Library/Caches/pip
+          - os: ARM64 # self-hosted linux ARM64 runners
+            os-name: linux-arm64
+            pip-path: ~/.cache/pip
 
-    name: Build on ${{ matrix.name }}
+    name: Build and release on ${{ matrix.os-name }}
     runs-on: ${{ matrix.os }}
-    needs: tag
 
     steps:
     - name: Checkout repo
@@ -77,36 +82,49 @@ jobs:
         fetch-depth: 0
 
     - name: Setup Python
+      if: ${{ matrix.os-name != 'linux-arm64' }}
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
-    - name: Install gcc
+    - name: Cache pip packages
+      id: pip_cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ matrix.pip-path }}
+        key: ${{ matrix.os-name }}-pip
+
+    - name: Install gcc(macos)
       id: gcc_install
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ matrix.os-name == 'macos' }}
       run: brew install gcc
-
+  
+    - name: Install cmake(linux-arm64)
+      id: cmake_install
+      if: ${{ matrix.os-name == 'linux-arm64' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake
     - name: Install meson and ninja
-      run: pip install meson ninja
+      id: meson_install
+      run: pip install scikit-build ninja meson
 
-    - name: Meson setup(${{ matrix.name }})
+    - name: Meson setup(${{ matrix.os-name }})
       id: meson_setup
-      if: ${{ matrix.os != 'macos-latest' }}
+      if: ${{ matrix.os-name != 'macos' }}
       run: meson setup builddir/
       env:
         CC: gcc
 
-    - name: Meson setup(${{ matrix.name }})
+    - name: Meson setup(macos)
       id: meson_macos_setup
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: ${{ matrix.os-name == 'macos' }}
       run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
 
     - name: Meson compile
       run: meson compile -C builddir/ -v
-      env:
-        CC: gcc
 
     - name: Release add build(${{ matrix.name }}
       id: release_build
@@ -131,47 +149,3 @@ jobs:
         asset_path: ./builddir/src/hex-to-image.exe
         asset_name: hex-to-image-windows.exe
         asset_content_type: application/vnd.microsoft.portable-executable
-
-  build_linux_arm64:
-    name: Build on linux-arm64
-    runs-on: [self-hosted, linux, ARM64]
-    needs: tag
-
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Install cmake
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Install meson and ninja
-      run: |
-        pip install scikit-build
-        pip install meson ninja
-
-    - name: Meson setup(linux-arm64)
-      id: meson_setup
-      run: meson setup builddir/
-      env:
-        CC: gcc
-
-    - name: Meson compile
-      run: meson compile -C builddir/ -v
-      env:
-        CC: gcc
-
-    - name: Release add build(linux-arm64)
-      id: release_build
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.tag.outputs.upload_url }}
-        asset_path: ./builddir/src/hex-to-image
-        asset_name: hex-to-image-linux-arm64
-        asset_content_type: application/x-sharedlib
