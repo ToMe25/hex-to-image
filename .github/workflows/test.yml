@@ -1,5 +1,5 @@
 # Tests whether the source code can be built with meson compile.
-# This would also be the workflow that runs unit tests, if I had written any.
+# Compiles the source code and runs unit tests.
 # All tests are run on windows, ubuntu, macos, and linux-arm64.
 name: meson test
 
@@ -98,9 +98,30 @@ jobs:
     - name: Meson test
       run: meson test -C builddir/ -v
 
-    - name: Upload Log
+    - name: Upload Binary
       uses: actions/upload-artifact@v2
-      if: failure()
+      if: ${{ matrix.os-name != 'windows' }}
       with:
-        name: ${{ matrix.os-name }}_meson_testlog
-        path: build/meson-logs/testlog.txt
+        name: meson_testlog_${{ matrix.os-name }}
+        path: builddir/src/hex-to-image
+
+    - name: Upload Binary(Windows)
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.os-name == 'windows' }}
+      with:
+        name: meson_testlog_${{ matrix.os-name }}
+        path: builddir/src/hex-to-image.exe
+
+    - name: Upload Test Log
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: meson_testlog_${{ matrix.os-name }}
+        path: builddir/meson-logs/testlog.txt
+
+    - name: Upload Output
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: output_${{ matrix.os-name }}
+        path: builddir/*.png

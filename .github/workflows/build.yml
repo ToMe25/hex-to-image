@@ -132,7 +132,7 @@ jobs:
 
     - name: Release add build(${{ matrix.os-name }})
       id: release_build
-      if: ${{ matrix.os != 'windows-latest' }}
+      if: ${{ matrix.os-name != 'windows' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -144,7 +144,7 @@ jobs:
 
     - name: Release add build(${{ matrix.os-name }})
       id: release_windows_build
-      if: ${{ matrix.os == 'windows-latest' }}
+      if: ${{ matrix.os-name == 'windows' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

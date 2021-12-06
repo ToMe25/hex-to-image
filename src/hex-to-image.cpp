@@ -9,8 +9,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -101,11 +99,6 @@ int main(const int argc, char **argv) {
 		hex_length = 8;
 	}
 
-	uint8_t channels = 3;
-	if (hex_length % 4 == 0) {
-		channels = 4;
-	}
-
 	if (output_file.find(".png") != std::string::npos) {
 		output_file = output_file.substr(0, output_file.find(".png"));
 	}
@@ -118,103 +111,15 @@ int main(const int argc, char **argv) {
 
 	if (hex_input.is_open()) {
 		std::string line;
-		uint16_t max_len = 0;
 
 		std::vector<std::string> lines;
 		while (getline(hex_input, line)) {
 			lines.push_back(line);
-			if (line.length() > max_len) {
-				max_len = line.length();
-			}
 		}
 
 		hex_input.close();
 
-		bool ignore_linebreaks = true;
-		double pixels_per_line = double(max_len) / hex_length;
-		if (width == 0) {
-			if (height == 0) {
-				width = ceil(pixels_per_line);
-				ignore_linebreaks = false;
-				height = lines.size();
-			} else {
-				width = ceil(double(lines.size()) / height * pixels_per_line);
-			}
-		}
-
-		if (height == 0) {
-			height = ceil(lines.size() / (width / pixels_per_line));
-		}
-
-		printf("Output image size: %d x %d pixels.\n", width, height);
-
-		uint8_t *pixel_colors = new uint8_t[width * height * channels];
-
-		for (uint32_t i = 0; i < width * height * channels; i++) {
-			pixel_colors[i] = 0;
-		}
-
-		std::string temp;
-		std::string color;
-		std::istringstream stream;
-		uint32_t array_pos = 0;
-		uint32_t parsed;
-		for (size_t y = 0; y < lines.size(); y++) {
-			line = lines[y];
-
-			if (ignore_linebreaks && temp.length() > 0) {
-				line = temp + line;
-				temp = "";
-			}
-
-			while (line.length() > 0) {
-				for (uint16_t x = 0; x < width; x++) {
-					if (line.length() < uint32_t((x + 1) * hex_length)) {
-						temp = line.substr(x * hex_length, line.length() - x * hex_length);
-						line = "";
-						break;
-					}
-
-					if (ignore_linebreaks) {
-						if (y != 0) {
-							array_pos += channels;
-						}
-					} else {
-						array_pos = y * width * channels + x * channels;
-					}
-
-					color = line.substr(x * hex_length, hex_length);
-					if (hex_length <= 4) {
-						color.resize(hex_length * 2);
-						for (int8_t i = hex_length - 1; i >= 0; i--) {
-							color[i * 2 + 1] = color[i * 2] = color[i];
-						}
-					}
-
-					stream.str(color);
-					stream >> std::hex >> parsed;
-
-					if (stream.rdbuf()->in_avail() > 0) {
-						cerr << line.substr(x * hex_length, hex_length) << " can't be parsed as hex input!" << endl;
-					} else {
-						pixel_colors[array_pos] = (parsed >> 16) & 0xFF;
-						pixel_colors[array_pos + 1] = (parsed >> 8) & 0xFF;
-						pixel_colors[array_pos + 2] = parsed & 0xFF;
-						if (channels == 4) {
-							pixel_colors[array_pos + 3] = (parsed >> 24) & 0xFF;
-						}
-					}
-
-					stream.clear();
-				}
-
-				if (line.length() > width * hex_length) {
-					line = line.substr(width * hex_length, line.length() - width * hex_length);
-				} else {
-					line = "";
-				}
-			}
-		}
+		uint8_t *pixel_colors = convert(lines, hex_length, width, height);
 
 		if (FILE *file = fopen(std::string(output_file).append(".png").c_str(), "r")) {
 			fclose(file);
@@ -243,6 +148,8 @@ int main(const int argc, char **argv) {
 			output_file.append(".png");
 		}
 
+		uint8_t channels = hex_length % 4 == 0 ? 4 : 3;
+
 		stbi_write_png(output_file.c_str(), width, height, channels, pixel_colors, width * channels);
 		cout << "Image saved as \"" << output_file << "\"." << endl;
 		delete[] pixel_colors;
@@ -252,6 +159,107 @@ int main(const int argc, char **argv) {
 		printf("Can't open input file %s.\n", input_file.c_str());
 		return 1;
 	}
+}
+
+uint8_t* convert(const std::vector<std::string> lines, const uint8_t hex_len, uint16_t &width, uint16_t &height) {
+	size_t max_len = 0;
+	for (std::string line : lines) {
+		max_len = std::max(max_len, line.length());
+	}
+
+	uint8_t channels = hex_len % 4 == 0 ? 4 : 3;
+
+	bool ignore_linebreaks = true;
+	double pixels_per_line = double(max_len) / hex_len;
+	if (width == 0) {
+		if (height == 0) {
+			width = ceil(pixels_per_line);
+			ignore_linebreaks = false;
+			height = lines.size();
+		} else {
+			width = ceil(double(lines.size()) / height * pixels_per_line);
+		}
+	}
+
+	if (height == 0) {
+		height = ceil(lines.size() / (width / pixels_per_line));
+	}
+
+	printf("Output image size: %d x %d pixels.\n", width, height);
+
+	uint8_t *pixel_colors = new uint8_t[width * height * channels];
+
+	for (uint32_t i = 0; i < width * height * channels; i++) {
+		pixel_colors[i] = 0;
+	}
+
+	std::string line;
+	std::string temp;
+	std::string color;
+	std::istringstream stream;
+	uint32_t array_pos = 0;
+	uint32_t parsed;
+	for (size_t y = 0; y < lines.size(); y++) {
+		line = lines[y];
+
+		if (ignore_linebreaks && temp.length() > 0) {
+			line = temp + line;
+			temp = "";
+		}
+
+		while (line.length() > 0) {
+			for (uint16_t x = 0; x < width; x++) {
+				if (line.length() < uint32_t((x + 1) * hex_len)) {
+					temp = line.substr(x * hex_len,
+							line.length() - x * hex_len);
+					line = "";
+					break;
+				}
+
+				if (ignore_linebreaks) {
+					if (y != 0) {
+						array_pos += channels;
+					}
+				} else {
+					array_pos = y * width * channels + x * channels;
+				}
+
+				color = line.substr(x * hex_len, hex_len);
+				if (hex_len <= 4) {
+					color.resize(hex_len * 2);
+					for (int8_t i = hex_len - 1; i >= 0; i--) {
+						color[i * 2 + 1] = color[i * 2] = color[i];
+					}
+				}
+
+				stream.str(color);
+				stream >> std::hex >> parsed;
+
+				if (stream.rdbuf()->in_avail() > 0) {
+					cerr << line.substr(x * hex_len, hex_len)
+							<< " can't be parsed as hex input!" << endl;
+				} else {
+					pixel_colors[array_pos] = (parsed >> 16) & 0xFF;
+					pixel_colors[array_pos + 1] = (parsed >> 8) & 0xFF;
+					pixel_colors[array_pos + 2] = parsed & 0xFF;
+					if (channels == 4) {
+						pixel_colors[array_pos + 3] = (parsed >> 24) & 0xFF;
+					}
+				}
+
+				stream.clear();
+			}
+
+			if (line.length() > width * hex_len) {
+				line = line.substr(width * hex_len,
+						line.length() - width * hex_len);
+			} else {
+				line = "";
+			}
+		}
+	}
+
+	return pixel_colors;
 }
 
 void printHelp() {
