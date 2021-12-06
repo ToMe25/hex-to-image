@@ -3,13 +3,13 @@
  * This project is licensed under the MIT License.
  * The MIT license can be found in the project root and at https://opensource.org/licenses/MIT.
  */
-#include <stdio.h>
-#include <iostream>
+#include <cmath>
+#include <cstdio>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <cmath>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
