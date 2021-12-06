@@ -113,9 +113,17 @@ jobs:
       id: meson_install
       run: pip install scikit-build ninja meson
 
-    - name: Meson setup
+    - name: Meson setup(${{ matrix.os-name }})
       id: meson_setup
+      if: ${{ matrix.os-name != 'macos' }}
       run: meson setup builddir/
+      env:
+        CC: gcc
+
+    - name: Meson setup(macos)
+      id: meson_macos_setup
+      if: ${{ matrix.os-name == 'macos' }}
+      run: meson setup builddir/ -Ddynamic=true
       env:
         CC: gcc
 

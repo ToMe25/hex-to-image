@@ -1,0 +1,1 @@
+option('dynamic', type : 'boolean', value : false, description : 'Disable dynamic linking')
