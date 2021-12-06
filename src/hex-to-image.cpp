@@ -3,6 +3,7 @@
  * This project is licensed under the MIT License.
  * The MIT license can be found in the project root and at https://opensource.org/licenses/MIT.
  */
+#include "hex-to-image.h"
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -14,49 +15,13 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
 
-enum class Commands {
-	Null,
-	Help,
-	Info,
-	Input,
-	Width,
-	Height,
-	Output,
-	Override,
-	Digits
-};
-
-void printHelp() {
-	cout << "Hex to image Help" << endl;
-	cout << "=================" << endl;
-	cout << "Hex to image is a simple program to convert text files with hex codes to images." << endl;
-	cout << "The Source code can be found at https://www.github.com/ToMe25/hex-to-image/" << endl;
-	cout << "Report issues here: https://www.github.com/ToMe25/hex-to-image/issues/" << endl << endl;
-	cout << "argument   |short  |default            |explanation" << endl;
-	cout << "-----------|-------|-------------------|-----------" << endl;
-	cout << "--help     |       |                   |Prints this help text and then quits." << endl;
-	cout << "--info     |       |                   |Prints some info about this program and then quits." << endl;
-	cout << "--input    |-i     |hex-input.txt      |Sets the file with the hex values to convert to an image." << endl;
-	cout << "--width    |-w     |0                  |Sets the width of the output image. Set to 0 to use the length of the lines in the input file." << endl;
-	cout << "--height   |-h     |0                  |Sets the height of the output image. Set to 0 to use the line count from the input file." << endl;
-	cout << "--output   |-o     |hex-to-image.png   |Sets the location of the output image." << endl;
-	cout << "--override |       |                   |Makes this program override the output file. If not specified it will append a number instead if the output already exists." << endl;
-	cout << "--digits   |-d     |6                  |Sets the number of hex digits to use for each pixel. Valid values are 3, 4, 6, and 8. If the values is 4 or 8 the output image will include transparency." << endl;
-}
-
-void printInfo() {
-	cout << "Hex to image is a simple program to convert text files with hex codes to images." << endl;
-	cout << "Copyright (C) 2021 ToMe25." << endl;
-	cout << "License: MIT License(https://opensource.org/licenses/MIT)." << endl;
-	cout << "This is free software: you are free to change and redistribute it." << endl;
-	cout << "There is NO WARRANTY, to the extent permitted by law." << endl;
-}
-
-int main(int argc, char **argv) {
-	string input_file = "hex-input.txt";
-	string output_file = "hex-to-image.png";
+int main(const int argc, char **argv) {
+	std::string input_file = "hex-input.txt";
+	std::string output_file = "hex-to-image.png";
 	uint8_t hex_length = 6;
 
 	uint16_t width = 0;
@@ -66,7 +31,7 @@ int main(int argc, char **argv) {
 
 	Commands command = Commands::Null;
 	for (int i = 0; i < argc; i++) {
-		string arg = string(argv[i]);
+		std::string arg(argv[i]);
 
 		while (arg[0] == ' ') {
 			cout << "Space" << endl;
@@ -141,21 +106,21 @@ int main(int argc, char **argv) {
 		channels = 4;
 	}
 
-	if (output_file.find(".png") != string::npos) {
+	if (output_file.find(".png") != std::string::npos) {
 		output_file = output_file.substr(0, output_file.find(".png"));
 	}
 
-	if (output_file.find(".PNG") != string::npos) {
+	if (output_file.find(".PNG") != std::string::npos) {
 		output_file = output_file.substr(0, output_file.find(".PNG"));
 	}
 
-	ifstream hex_input(input_file);
+	std::ifstream hex_input(input_file);
 
 	if (hex_input.is_open()) {
-		string line;
+		std::string line;
 		uint16_t max_len = 0;
 
-		vector<string> lines;
+		std::vector<std::string> lines;
 		while (getline(hex_input, line)) {
 			lines.push_back(line);
 			if (line.length() > max_len) {
@@ -189,9 +154,9 @@ int main(int argc, char **argv) {
 			pixel_colors[i] = 0;
 		}
 
-		string temp;
-		string color;
-		istringstream stream;
+		std::string temp;
+		std::string color;
+		std::istringstream stream;
 		uint32_t array_pos = 0;
 		uint32_t parsed;
 		for (size_t y = 0; y < lines.size(); y++) {
@@ -227,7 +192,7 @@ int main(int argc, char **argv) {
 					}
 
 					stream.str(color);
-					stream >> hex >> parsed;
+					stream >> std::hex >> parsed;
 
 					if (stream.rdbuf()->in_avail() > 0) {
 						cerr << line.substr(x * hex_length, hex_length) << " can't be parsed as hex input!" << endl;
@@ -251,15 +216,15 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		if (FILE *file = fopen(string(output_file).append(".png").c_str(), "r")) {
+		if (FILE *file = fopen(std::string(output_file).append(".png").c_str(), "r")) {
 			fclose(file);
 			if (override_output) {
 				output_file.append(".png");
 			} else {
 				uint16_t file_nr = 1;
 				while (FILE *file = fopen(
-						string(output_file).append("-").append(
-								to_string(file_nr)).append(".png").c_str(), "r")) {
+						std::string(output_file).append("-").append(
+								std::to_string(file_nr)).append(".png").c_str(), "r")) {
 					fclose(file);
 					file_nr++;
 					if (file_nr == 0) {
@@ -271,7 +236,7 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				output_file.append("-").append(to_string(file_nr)).append(
+				output_file.append("-").append(std::to_string(file_nr)).append(
 						".png");
 			}
 		} else {
@@ -287,4 +252,30 @@ int main(int argc, char **argv) {
 		printf("Can't open input file %s.\n", input_file.c_str());
 		return 1;
 	}
+}
+
+void printHelp() {
+	cout << "Hex to image Help" << endl;
+	cout << "=================" << endl;
+	cout << "Hex to image is a simple program to convert text files with hex codes to images." << endl;
+	cout << "The Source code can be found at https://www.github.com/ToMe25/hex-to-image/" << endl;
+	cout << "Report issues here: https://www.github.com/ToMe25/hex-to-image/issues/" << endl << endl;
+	cout << "argument   |short  |default            |explanation" << endl;
+	cout << "-----------|-------|-------------------|-----------" << endl;
+	cout << "--help     |       |                   |Prints this help text and then quits." << endl;
+	cout << "--info     |       |                   |Prints some info about this program and then quits." << endl;
+	cout << "--input    |-i     |hex-input.txt      |Sets the file with the hex values to convert to an image." << endl;
+	cout << "--width    |-w     |0                  |Sets the width of the output image. Set to 0 to use the length of the lines in the input file." << endl;
+	cout << "--height   |-h     |0                  |Sets the height of the output image. Set to 0 to use the line count from the input file." << endl;
+	cout << "--output   |-o     |hex-to-image.png   |Sets the location of the output image." << endl;
+	cout << "--override |       |                   |Makes this program override the output file. If not specified it will append a number instead if the output already exists." << endl;
+	cout << "--digits   |-d     |6                  |Sets the number of hex digits to use for each pixel. Valid values are 3, 4, 6, and 8. If the values is 4 or 8 the output image will include transparency." << endl;
+}
+
+void printInfo() {
+	cout << "Hex to image is a simple program to convert text files with hex codes to images." << endl;
+	cout << "Copyright (C) 2021 ToMe25." << endl;
+	cout << "License: MIT License(https://opensource.org/licenses/MIT)." << endl;
+	cout << "This is free software: you are free to change and redistribute it." << endl;
+	cout << "There is NO WARRANTY, to the extent permitted by law." << endl;
 }
